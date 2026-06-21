@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% block title %}Analytics{% endblock %}
+{% block content %}
+
+<div class="section-head">
+  <div>
+    <span class="eyebrow">Admin Console</span>
+    <h2>Analytics</h2>
+  </div>
+</div>
+
+<div class="grid grid-2" style="align-items:start; margin-bottom:24px;">
+  <div class="card chart-card" style="grid-column: 1 / -1;">
+    <h3>Revenue — Last 30 Days</h3>
+    <canvas id="revenue30Chart" height="90"></canvas>
+  </div>
+</div>
+
+<div class="grid grid-2" style="align-items:start;">
+  <div class="card chart-card">
+    <h3>Bookings by Vehicle Type</h3>
+    <canvas id="vehicleSplitChart" height="200"></canvas>
+  </div>
+  <div class="card chart-card">
+    <h3>Peak Entry Hours</h3>
+    <canvas id="peakHoursChart" height="200"></canvas>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+const r30Labels = {{ rev30_days | tojson }};
+const r30Data = {{ rev30_totals | tojson }};
+
+new Chart(document.getElementById('revenue30Chart'), {
+  type: 'line',
+  data: {
+    labels: r30Labels,
+    datasets: [{
+      label: 'Revenue (₹)', data: r30Data,
+      borderColor: '#00c2a0', backgroundColor: 'rgba(0,194,160,0.14)',
+      tension: 0.3, fill: true, pointRadius: 2,
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#8893a8' }, grid: { color: '#232b3b' } },
+      y: { ticks: { color: '#8893a8' }, grid: { color: '#232b3b' } }
+    }
+  }
+});
+
+const vsLabels = {{ vehicle_labels | tojson }};
+const vsData = {{ vehicle_data | tojson }};
+
+new Chart(document.getElementById('vehicleSplitChart'), {
+  type: 'doughnut',
+  data: {
+    labels: vsLabels,
+    datasets: [{ data: vsData, backgroundColor: ['#4f8dfd', '#ffab2e'], borderWidth: 0 }]
+  },
+  options: { plugins: { legend: { labels: { color: '#c7cedb' } } } }
+});
+
+const phLabels = {{ peak_labels | tojson }};
+const phData = {{ peak_data | tojson }};
+
+new Chart(document.getElementById('peakHoursChart'), {
+  type: 'bar',
+  data: {
+    labels: phLabels,
+    datasets: [{ label: 'Entries', data: phData, backgroundColor: '#00c2a0', borderRadius: 5 }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#8893a8' }, grid: { display: false } },
+      y: { ticks: { color: '#8893a8' }, grid: { color: '#232b3b' } }
+    }
+  }
+});
+</script>
+{% endblock %}

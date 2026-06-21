@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Users{% endblock %}
+{% block content %}
+
+<div class="section-head">
+  <div>
+    <span class="eyebrow">Admin Console</span>
+    <h2>Registered Users</h2>
+  </div>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Phone</th><th>Role</th><th>Bookings</th><th>Joined</th></tr>
+    </thead>
+    <tbody>
+      {% for u in users %}
+      <tr>
+        <td>{{ u['name'] }}</td>
+        <td class="cell-mono">{{ u['email'] }}</td>
+        <td>{{ u['phone'] or '—' }}</td>
+        <td><span class="pill {{ 'bike' if u['role'] == 'admin' else 'car' }}">{{ u['role'] }}</span></td>
+        <td>{{ u['booking_count'] }}</td>
+        <td class="cell-mono">{{ u['created_at'] }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

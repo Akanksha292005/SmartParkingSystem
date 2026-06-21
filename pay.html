@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Pay{% endblock %}
+{% block content %}
+
+<div class="container-narrow">
+  <div class="card auth-card">
+    <span class="eyebrow">Checkout</span>
+    <h2 style="font-size:1.5rem;">Complete Payment</h2>
+
+    <div class="row" style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+      <span class="muted">Booking</span><span class="mono" style="color:var(--text-0);">{{ booking['booking_code'] }}</span>
+    </div>
+    <div class="row" style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border);">
+      <span class="muted">Vehicle</span><span style="color:var(--text-0);">{{ booking['vehicle_number'] }}</span>
+    </div>
+    <div class="row" style="display:flex; justify-content:space-between; padding:10px 0 18px;">
+      <span class="muted">Amount Due</span><span style="color:var(--yellow); font-family:var(--font-display); font-size:1.4rem;">₹{{ booking['amount'] }}</span>
+    </div>
+
+    <form method="POST" action="{{ url_for('pay', booking_code=booking['booking_code']) }}">
+      <div class="form-group">
+        <label for="method">Payment Method</label>
+        <select class="form-control" id="method" name="method">
+          <option value="UPI">UPI</option>
+          <option value="Card">Credit / Debit Card</option>
+          <option value="Wallet">Wallet</option>
+          <option value="Cash">Cash at Counter</option>
+        </select>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Pay ₹{{ booking['amount'] }}</button>
+    </form>
+    <p class="muted" style="font-size:0.78rem; text-align:center; margin-top:14px;">This is a simulated payment for demo purposes.</p>
+  </div>
+</div>
+
+{% endblock %}

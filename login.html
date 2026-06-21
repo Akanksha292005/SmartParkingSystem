@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Log In{% endblock %}
+{% block content %}
+<div class="container-narrow">
+  <div class="card auth-card">
+    <span class="eyebrow">Welcome Back</span>
+    <h2 style="font-size:1.6rem;">Log in to SmartPark</h2>
+
+    <form method="POST" action="{{ url_for('login') }}" style="margin-top:24px;">
+      <div class="form-group">
+        <label for="email">Email</label>
+        <input class="form-control" type="email" id="email" name="email" required placeholder="you@example.com">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input class="form-control" type="password" id="password" name="password" required placeholder="Your password">
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">Log In</button>
+    </form>
+
+    <p class="auth-foot">New here? <a href="{{ url_for('register') }}">Create an account</a></p>
+
+    <div class="demo-hint">
+      Demo admin &mdash; admin@parking.com / admin123<br>
+      Demo user &mdash; user@parking.com / user123
+    </div>
+  </div>
+</div>
+{% endblock %}

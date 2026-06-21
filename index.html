@@ -1,0 +1,243 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
+{% from "_icons.html" import car, bike, qr, clock, shield, chart, wallet, layers, bolt %}
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div>
+    <span class="eyebrow">Real-time Parking Management</span>
+    <h1>Find. Book. Park.<br><span class="text-gradient">No more circling the block.</span></h1>
+    <p class="lead">SmartPark gives you live slot availability across every floor, instant booking with QR-coded tickets, and automatic fare calculation the moment you drive out.</p>
+    <div class="hero-actions">
+      {% if user %}
+        {% if user['role'] == 'admin' %}
+          <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">Go to Admin Console</a>
+        {% else %}
+          <a href="{{ url_for('book_slot') }}" class="btn btn-primary">Book a Slot Now</a>
+        {% endif %}
+      {% else %}
+        <a href="{{ url_for('register') }}" class="btn btn-primary">Get Started Free</a>
+        <a href="{{ url_for('login') }}" class="btn btn-ghost">Log In</a>
+      {% endif %}
+    </div>
+
+    <div class="stat-row">
+      {% set total_available = counts | sum(attribute='available') %}
+      {% set total_occupied = counts | sum(attribute='occupied') %}
+      <div class="stat-pill available">
+        <div class="num">{{ total_available }}</div>
+        <div class="lbl">Slots Available</div>
+      </div>
+      <div class="stat-pill occupied">
+        <div class="num">{{ total_occupied }}</div>
+        <div class="lbl">Currently Occupied</div>
+      </div>
+      <div class="stat-pill">
+        <div class="num">{{ floors | length }}</div>
+        <div class="lbl">Parking Floors</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scene-card">
+    <svg viewBox="0 0 420 300" xmlns="http://www.w3.org/2000/svg">
+      <!-- Garage structure -->
+      <rect x="10" y="20" width="400" height="260" rx="14" fill="var(--bg-3)" stroke="var(--border-light)" stroke-width="1.5"/>
+      <line x1="10" y1="110" x2="410" y2="110" stroke="var(--border-light)" stroke-width="1.5"/>
+      <line x1="10" y1="195" x2="410" y2="195" stroke="var(--border-light)" stroke-width="1.5"/>
+
+      <!-- Floor labels -->
+      <text x="26" y="42" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--text-3)">LEVEL 02</text>
+      <text x="26" y="128" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--text-3)">LEVEL 01</text>
+      <text x="26" y="213" font-family="JetBrains Mono, monospace" font-size="11" fill="var(--text-3)">GROUND</text>
+
+      <!-- Parking bays level 2 -->
+      <g>
+        <rect x="120" y="55" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+        <rect x="165" y="55" width="34" height="40" rx="4" fill="rgba(255,84,112,0.14)" stroke="var(--red)" stroke-width="1.4" opacity="0.7"/>
+        <rect x="210" y="55" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+        <rect x="255" y="55" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+      </g>
+
+      <!-- Parking bays level 1 (with a parked car) -->
+      <g>
+        <rect x="120" y="140" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+        <rect x="165" y="140" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+        <rect x="210" y="140" width="34" height="40" rx="4" fill="rgba(255,84,112,0.14)" stroke="var(--red)" stroke-width="1.4" opacity="0.7"/>
+        <rect x="255" y="140" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+        <!-- mini parked car -->
+        <g transform="translate(211,148)">
+          <rect x="0" y="6" width="32" height="18" rx="5" fill="var(--blue)" opacity="0.9"/>
+          <rect x="6" y="0" width="20" height="9" rx="4" fill="var(--blue)" opacity="0.75"/>
+        </g>
+      </g>
+
+      <!-- Ground floor: entry barrier + driving car -->
+      <g>
+        <!-- barrier post -->
+        <rect x="40" y="210" width="6" height="46" rx="2" fill="var(--bg-2)" stroke="var(--border-light)"/>
+        <g transform="translate(46,212)">
+          <g class="scene-barrier">
+            <rect x="0" y="0" width="74" height="7" rx="3" fill="var(--amber)"/>
+          </g>
+        </g>
+
+        <!-- driving car -->
+        <g transform="translate(20,232)">
+          <g class="scene-car-drive">
+            <rect x="0" y="8" width="44" height="20" rx="6" fill="var(--teal)"/>
+            <rect x="8" y="0" width="26" height="11" rx="4" fill="var(--teal)" opacity="0.8"/>
+            <circle cx="10" cy="29" r="4.5" fill="var(--bg-0)" stroke="var(--text-2)"/>
+            <circle cx="34" cy="29" r="4.5" fill="var(--bg-0)" stroke="var(--text-2)"/>
+          </g>
+        </g>
+
+        <!-- available ground bays -->
+        <rect x="280" y="222" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+        <rect x="325" y="222" width="34" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+        <rect x="370" y="222" width="30" height="40" rx="4" fill="rgba(0,194,160,0.16)" stroke="var(--teal)" stroke-width="1.4"/>
+      </g>
+
+      <!-- Smart sensor radar (signature element) -->
+      <g transform="translate(355,55)">
+        <circle class="scene-sweep" cx="0" cy="0" r="22" fill="none" stroke="var(--teal)" stroke-width="1.5"/>
+        <circle class="scene-pulse" cx="0" cy="0" r="4" fill="var(--teal)"/>
+        <circle cx="0" cy="0" r="2" fill="var(--bg-0)"/>
+      </g>
+    </svg>
+  </div>
+</section>
+
+<section style="margin-top: 56px;">
+  <div class="section-head">
+    <h2>Built for Every Vehicle</h2>
+    <span class="muted" style="font-size:0.88rem;">Dedicated bays, sized and priced right</span>
+  </div>
+  <div class="vehicle-showcase">
+    <div class="showcase-photo">
+      <img src="https://images.unsplash.com/photo-1738802908153-ac8fb49f7cc0?fm=jpg&q=75&w=1400&auto=format&fit=crop" alt="Car parked in SmartPark garage" loading="lazy">
+      <div class="showcase-caption">
+        <span class="tag">{{ car("") }} Car Bays</span>
+        <h3>12 bays per floor</h3>
+        <p>₹30 first hour &middot; ₹20 every hour after</p>
+      </div>
+    </div>
+    <div class="showcase-stack">
+      <div class="showcase-photo">
+        <img src="https://images.unsplash.com/photo-1704073665735-a6fd2774514d?fm=jpg&q=75&w=900&auto=format&fit=crop" alt="Motorcycle parked in SmartPark garage" loading="lazy">
+        <div class="showcase-caption">
+          <span class="tag">{{ bike("") }} Bike Bays</span>
+          <h3>6 bays per floor</h3>
+        </div>
+      </div>
+      <div class="showcase-photo">
+        <img src="https://images.unsplash.com/photo-1506521781263-d8422e82f27a?fm=jpg&q=75&w=900&auto=format&fit=crop" alt="Aerial view of parking facility" loading="lazy">
+        <div class="showcase-caption">
+          <span class="tag">{{ layers("") }} 3 Floors</span>
+          <h3>54 total bays</h3>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section style="margin-top: 56px;">
+  <div class="section-head">
+    <h2>Live Floor Occupancy</h2>
+    <span class="muted mono" style="font-size:0.8rem;">● updated in real time</span>
+  </div>
+  <div class="grid grid-3">
+    {% for floor in floors %}
+    <div class="card">
+      <div class="floor-card-top">
+        <strong style="color:var(--text-0); font-family:var(--font-display);">{{ floor['name'] }}</strong>
+        <span class="floor-icon">{{ layers("") }}</span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" style="width: 55%"></div></div>
+      <p class="muted" style="font-size:0.82rem; margin-top:12px; margin-bottom:0;">Car &amp; bike slots &middot; live status in booking screen</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section style="margin-top: 64px;">
+  <div class="section-head">
+    <h2>Why SmartPark</h2>
+  </div>
+  <div class="grid grid-3">
+    <div class="card feature-card">
+      <span class="icon-badge">{{ bolt("") }}</span>
+      <h3 style="font-size:1.1rem;">Live Availability</h3>
+      <p class="muted" style="font-size:0.9rem;">See open spots by floor and vehicle type, refreshed automatically every few seconds.</p>
+    </div>
+    <div class="card feature-card">
+      <span class="icon-badge">{{ qr("") }}</span>
+      <h3 style="font-size:1.1rem;">Instant QR Ticket</h3>
+      <p class="muted" style="font-size:0.9rem;">A unique booking code and scannable QR ticket are generated the moment you reserve.</p>
+    </div>
+    <div class="card feature-card">
+      <span class="icon-badge">{{ clock("") }}</span>
+      <h3 style="font-size:1.1rem;">Pay for What You Use</h3>
+      <p class="muted" style="font-size:0.9rem;">Fare is calculated automatically from your actual parked duration at checkout.</p>
+    </div>
+    <div class="card feature-card">
+      <span class="icon-badge">{{ shield("") }}</span>
+      <h3 style="font-size:1.1rem;">Secure Accounts</h3>
+      <p class="muted" style="font-size:0.9rem;">Encrypted passwords and role-based access keep driver and admin data separate.</p>
+    </div>
+    <div class="card feature-card">
+      <span class="icon-badge">{{ chart("") }}</span>
+      <h3 style="font-size:1.1rem;">Admin Analytics</h3>
+      <p class="muted" style="font-size:0.9rem;">Revenue trends, occupancy by floor, and peak-hour insights for operators.</p>
+    </div>
+    <div class="card feature-card">
+      <span class="icon-badge">{{ wallet("") }}</span>
+      <h3 style="font-size:1.1rem;">Flexible Payments</h3>
+      <p class="muted" style="font-size:0.9rem;">UPI, card, wallet, or cash at the counter — your call at checkout.</p>
+    </div>
+  </div>
+</section>
+
+<section style="margin-top: 64px;">
+  <div class="section-head">
+    <h2>How it works</h2>
+  </div>
+  <div class="grid grid-3">
+    <div class="card">
+      <span class="eyebrow">Step 01</span>
+      <h3 style="font-size:1.1rem;">Pick a Slot</h3>
+      <p class="muted" style="font-size:0.9rem;">Browse live availability by floor and vehicle type, then reserve in one tap.</p>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Step 02</span>
+      <h3 style="font-size:1.1rem;">Get Your QR Ticket</h3>
+      <p class="muted" style="font-size:0.9rem;">A unique booking code and QR ticket are generated instantly for gate entry.</p>
+    </div>
+    <div class="card">
+      <span class="eyebrow">Step 03</span>
+      <h3 style="font-size:1.1rem;">Drive Out, Auto-Billed</h3>
+      <p class="muted" style="font-size:0.9rem;">Fare is calculated automatically from actual parked duration at checkout.</p>
+    </div>
+  </div>
+</section>
+
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <span class="eyebrow" style="justify-content:center;">Ready When You Are</span>
+  <h2>Stop circling. Start parking.</h2>
+  <p>Join SmartPark and get a guaranteed, reserved bay before you even reach the gate.</p>
+  <div class="hero-actions">
+    {% if user %}
+      {% if user['role'] == 'admin' %}
+        <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary">Go to Admin Console</a>
+      {% else %}
+        <a href="{{ url_for('book_slot') }}" class="btn btn-primary">Book a Slot Now</a>
+      {% endif %}
+    {% else %}
+      <a href="{{ url_for('register') }}" class="btn btn-primary">Create Free Account</a>
+    {% endif %}
+  </div>
+</section>
+
+{% endblock %}

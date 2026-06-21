@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block title %}Manage Bookings{% endblock %}
+{% block content %}
+{% from "_icons.html" import checkin, clock %}
+
+<div class="section-head">
+  <div>
+    <span class="eyebrow">Admin Console</span>
+    <h2>All Bookings</h2>
+  </div>
+</div>
+
+<div class="filter-bar">
+  <form method="GET" action="{{ url_for('admin_bookings') }}">
+    <select name="status" class="form-control" onchange="this.form.submit()">
+      <option value="all" {{ 'selected' if status_filter == 'all' }}>All Statuses</option>
+      <option value="booked" {{ 'selected' if status_filter == 'booked' }}>Booked</option>
+      <option value="active" {{ 'selected' if status_filter == 'active' }}>Active (Parked)</option>
+      <option value="completed" {{ 'selected' if status_filter == 'completed' }}>Completed</option>
+      <option value="cancelled" {{ 'selected' if status_filter == 'cancelled' }}>Cancelled</option>
+    </select>
+    <input type="text" name="q" class="form-control" placeholder="Search vehicle, code, or user" value="{{ search }}">
+    <button type="submit" class="btn btn-ghost btn-sm">Search</button>
+  </form>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>Code</th><th>User</th><th>Vehicle</th><th>Floor / Slot</th>
+        <th>Status</th><th>Entry</th><th>Exit</th><th>Amount</th><th>Payment</th><th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for b in bookings %}
+      <tr>
+        <td class="cell-mono">{{ b['booking_code'] }}</td>
+        <td>{{ b['user_name'] }}</td>
+        <td>{{ b['vehicle_number'] }} <span class="pill {{ b['vehicle_type'] }}">{{ b['vehicle_type'] }}</span></td>
+        <td>{{ b['floor_name'] }} &middot; {{ b['slot_number'] }}</td>
+        <td><span class="status-badge status-{{ b['status'] }}">{{ b['status'] }}</span></td>
+        <td class="cell-mono">{{ b['entry_time'] or '—' }}</td>
+        <td class="cell-mono">{{ b['exit_time'] or '—' }}</td>
+        <td>₹{{ b['amount'] }}</td>
+        <td><span class="status-badge status-{{ b['payment_status'] }}">{{ b['payment_status'] }}</span></td>
+        <td>
+          {% if b['status'] == 'booked' %}
+            <form method="POST" action="{{ url_for('checkin', booking_code=b['booking_code']) }}">
+              <button type="submit" class="btn btn-success btn-sm">{{ checkin("") }} Check In</button>
+            </form>
+          {% elif b['status'] == 'active' %}
+            <form method="POST" action="{{ url_for('checkout', booking_code=b['booking_code']) }}">
+              <button type="submit" class="btn btn-danger btn-sm">{{ clock("") }} Check Out</button>
+            </form>
+          {% else %}
+            <span class="muted">—</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% else %}
+      <tr><td colspan="10" class="muted text-center">No bookings match this filter.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

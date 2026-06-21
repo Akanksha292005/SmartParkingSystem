@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Manage Slots{% endblock %}
+{% block content %}
+
+<div class="section-head">
+  <div>
+    <span class="eyebrow">Admin Console</span>
+    <h2>Slot Inventory</h2>
+  </div>
+</div>
+
+<div class="card" style="margin-bottom:28px;">
+  <h3 style="font-size:1rem; margin-bottom:16px;">Add New Slot</h3>
+  <form method="POST" action="{{ url_for('add_slot') }}" class="form-row" style="align-items:flex-end;">
+    <div class="form-group">
+      <label for="floor_id">Floor</label>
+      <select class="form-control" name="floor_id" id="floor_id">
+        {% for f in floors %}<option value="{{ f['id'] }}">{{ f['name'] }}</option>{% endfor %}
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="vehicle_type">Vehicle Type</label>
+      <select class="form-control" name="vehicle_type" id="vehicle_type">
+        <option value="car">Car</option>
+        <option value="bike">Bike</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="slot_number">Slot Number</label>
+      <input class="form-control" type="text" name="slot_number" id="slot_number" placeholder="e.g. C13" required>
+    </div>
+    <div class="form-group" style="flex:0 0 auto;">
+      <button type="submit" class="btn btn-primary">Add Slot</button>
+    </div>
+  </form>
+</div>
+
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Floor</th><th>Slot</th><th>Type</th><th>Status</th><th>Action</th></tr>
+    </thead>
+    <tbody>
+      {% for s in slots %}
+      <tr>
+        <td>{{ s['floor_name'] }}</td>
+        <td class="cell-mono">{{ s['slot_number'] }}</td>
+        <td><span class="pill {{ s['vehicle_type'] }}">{{ s['vehicle_type'] }}</span></td>
+        <td>
+          {% if s['status'] == 'available' %}<span class="status-badge status-completed">available</span>
+          {% elif s['status'] == 'disabled' %}<span class="status-badge status-cancelled">disabled</span>
+          {% else %}<span class="status-badge status-active">{{ s['status'] }}</span>{% endif %}
+        </td>
+        <td>
+          {% if s['status'] in ('available', 'disabled') %}
+          <form method="POST" action="{{ url_for('toggle_slot', slot_id=s['id']) }}">
+            <button type="submit" class="btn btn-ghost btn-sm">
+              {{ 'Enable' if s['status'] == 'disabled' else 'Disable' }}
+            </button>
+          </form>
+          {% else %}
+          <span class="muted">In use</span>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block title %}My Dashboard{% endblock %}
+{% block content %}
+{% from "_icons.html" import empty %}
+
+<div class="section-head">
+  <div>
+    <span class="eyebrow">Welcome back, {{ user['name'] }}</span>
+    <h2>My Parking</h2>
+  </div>
+  <a href="{{ url_for('book_slot') }}" class="btn btn-primary">+ Book a Slot</a>
+</div>
+
+<h3 style="font-size:1.05rem; margin-bottom:14px;">Active &amp; Upcoming</h3>
+{% if active %}
+<div class="grid grid-3" style="margin-bottom:40px;">
+  {% for b in active %}
+  <div class="card">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <span class="status-badge status-{{ b['status'] }}">{{ b['status'] }}</span>
+      <span class="pill {{ b['vehicle_type'] }}">{{ b['vehicle_type'] }}</span>
+    </div>
+    <p class="mono" style="color:var(--yellow); font-size:1.1rem; margin:12px 0 4px;">{{ b['booking_code'] }}</p>
+    <p class="muted" style="font-size:0.85rem; margin:0 0 14px;">{{ b['floor_name'] }} &middot; Slot {{ b['slot_number'] }} &middot; {{ b['vehicle_number'] }}</p>
+    <div style="display:flex; gap:8px;">
+      <a href="{{ url_for('ticket', booking_code=b['booking_code']) }}" class="btn btn-ghost btn-sm" style="flex:1;">View Ticket</a>
+      {% if b['status'] == 'booked' %}
+      <form method="POST" action="{{ url_for('cancel_booking', booking_code=b['booking_code']) }}" style="flex:1;" onsubmit="return confirm('Cancel this booking?');">
+        <button type="submit" class="btn btn-danger btn-sm btn-block">Cancel</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="card empty-state" style="margin-bottom:40px;">
+  {{ empty("") }}
+  <p>No active bookings right now.</p>
+  <a href="{{ url_for('book_slot') }}" class="btn btn-primary btn-sm">Book your first slot</a>
+</div>
+{% endif %}
+
+<h3 style="font-size:1.05rem; margin-bottom:14px;">Recent History</h3>
+{% if history %}
+<div class="table-wrap">
+  <table>
+    <thead>
+      <tr><th>Code</th><th>Vehicle</th><th>Floor / Slot</th><th>Status</th><th>Amount</th><th>Payment</th><th></th></tr>
+    </thead>
+    <tbody>
+      {% for b in history %}
+      <tr>
+        <td class="cell-mono">{{ b['booking_code'] }}</td>
+        <td>{{ b['vehicle_number'] }} <span class="pill {{ b['vehicle_type'] }}">{{ b['vehicle_type'] }}</span></td>
+        <td>{{ b['floor_name'] }} &middot; {{ b['slot_number'] }}</td>
+        <td><span class="status-badge status-{{ b['status'] }}">{{ b['status'] }}</span></td>
+        <td>₹{{ b['amount'] }}</td>
+        <td><span class="status-badge status-{{ b['payment_status'] }}">{{ b['payment_status'] }}</span></td>
+        <td>
+          {% if b['status'] == 'completed' and b['payment_status'] == 'pending' %}
+            <a href="{{ url_for('pay', booking_code=b['booking_code']) }}" class="btn btn-primary btn-sm">Pay Now</a>
+          {% else %}
+            <a href="{{ url_for('ticket', booking_code=b['booking_code']) }}" class="btn btn-ghost btn-sm">Details</a>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="card empty-state">
+  {{ empty("") }}
+  <p>Your booking history will show up here.</p>
+</div>
+{% endif %}
+
+{% endblock %}

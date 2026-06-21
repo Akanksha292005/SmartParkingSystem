@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}Book a Slot{% endblock %}
+{% block content %}
+{% from "_icons.html" import car, bike %}
+
+<div class="section-head">
+  <div>
+    <span class="eyebrow">Reserve in Seconds</span>
+    <h2>Book a Parking Slot</h2>
+  </div>
+</div>
+
+<form method="POST" action="{{ url_for('book_slot') }}" id="bookingForm">
+  <div class="grid" style="grid-template-columns: 2fr 1fr; align-items:start;">
+
+    <div>
+      <div class="vehicle-toggle">
+        <button type="button" data-type="car" class="active">{{ car("") }} Car</button>
+        <button type="button" data-type="bike">{{ bike("") }} Bike</button>
+      </div>
+
+      <div class="floor-tabs">
+        {% for floor in floors %}
+        <button type="button" data-floor-id="{{ floor['id'] }}" class="{{ 'active' if loop.first }}">{{ floor['name'] }}</button>
+        {% endfor %}
+      </div>
+
+      <div class="legend">
+        <span><i class="lg-available"></i> Available</span>
+        <span><i class="lg-taken"></i> Booked / Occupied</span>
+        <span><i class="lg-disabled"></i> Out of service</span>
+        <span><i class="lg-selected"></i> Your selection</span>
+      </div>
+
+      <div class="card">
+        <div id="slotMap" class="slot-map"></div>
+      </div>
+    </div>
+
+    <div class="card booking-summary">
+      <h3 style="font-size:1rem;">Booking Summary</h3>
+      <div class="row"><span class="muted">Vehicle Type</span><span class="v" id="summaryVehicle">Car</span></div>
+      <div class="row"><span class="muted">Floor</span><span class="v" id="summaryFloor">{{ floors[0]['name'] if floors else '' }}</span></div>
+      <div class="row"><span class="muted">Selected Slot</span><span class="v" id="summarySlot">—</span></div>
+      <div class="row"><span class="muted">Est. Amount</span><span class="v" id="summaryAmount">₹30</span></div>
+
+      <div class="form-group" style="margin-top:18px;">
+        <label for="vehicle_number">Vehicle Number</label>
+        <input class="form-control" type="text" id="vehicle_number" name="vehicle_number" required placeholder="e.g. MP09 AB 1234" style="text-transform:uppercase;">
+      </div>
+      <div class="form-group">
+        <label for="expected_hours">Expected Duration (hours)</label>
+        <input class="form-control" type="number" id="expected_hours" name="expected_hours" min="1" step="0.5" value="1">
+      </div>
+
+      <input type="hidden" id="slot_id" name="slot_id" value="">
+      <input type="hidden" name="vehicle_type" id="vehicle_type_field" value="car">
+
+      <button type="submit" id="bookBtn" class="btn btn-primary btn-block" disabled>Confirm Booking</button>
+      <p class="muted" style="font-size:0.78rem; margin-top:10px;">Final amount is calculated from actual time parked at checkout.</p>
+    </div>
+
+  </div>
+</form>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+  window.FLOORS = [{% for f in floors %}{ id: {{ f['id'] }}, name: "{{ f['name'] }}" }{{ "," if not loop.last }}{% endfor %}];
+</script>
+<script src="{{ url_for('static', filename='js/booking.js') }}"></script>
+<script>
+  // keep the hidden vehicle_type field in sync with the visible toggle state
+  document.addEventListener('DOMContentLoaded', () => {
+    const observer = setInterval(() => {
+      document.getElementById('vehicle_type_field').value = state.vehicleType;
+    }, 300);
+  });
+</script>
+{% endblock %}

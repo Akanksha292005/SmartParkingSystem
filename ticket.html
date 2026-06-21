@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block title %}Ticket {{ booking['booking_code'] }}{% endblock %}
+{% block content %}
+{% from "_icons.html" import car %}
+
+<div class="ticket">
+  <div class="ticket-head">
+    <div class="ticket-head-inner">
+      {{ car("") }}
+      <div>
+        <span class="eyebrow" style="margin-bottom:2px;">Parking Ticket</span>
+        <h3 style="margin:0; font-size:1.2rem;">SmartPark</h3>
+      </div>
+    </div>
+  </div>
+  <div class="ticket-body">
+    <div class="text-center">
+      <span class="status-badge status-{{ booking['status'] }}">{{ booking['status'] }}</span>
+    </div>
+    <p class="ticket-code">{{ booking['booking_code'] }}</p>
+
+    <div class="qr-wrap">
+      <img src="{{ url_for('qr_code', booking_code=booking['booking_code']) }}" width="160" height="160" alt="QR code">
+    </div>
+
+    <div class="row"><span class="muted">Vehicle Number</span><span class="v">{{ booking['vehicle_number'] }}</span></div>
+    <div class="row"><span class="muted">Vehicle Type</span><span class="v">{{ booking['vehicle_type'] | capitalize }}</span></div>
+    <div class="row"><span class="muted">Floor</span><span class="v">{{ booking['floor_name'] }}</span></div>
+    <div class="row"><span class="muted">Slot</span><span class="v">{{ booking['slot_number'] }}</span></div>
+    <div class="row"><span class="muted">Booked At</span><span class="v">{{ booking['booked_at'] }}</span></div>
+    {% if booking['entry_time'] %}
+    <div class="row"><span class="muted">Entry Time</span><span class="v">{{ booking['entry_time'] }}</span></div>
+    {% endif %}
+    {% if booking['exit_time'] %}
+    <div class="row"><span class="muted">Exit Time</span><span class="v">{{ booking['exit_time'] }}</span></div>
+    {% endif %}
+    <div class="row"><span class="muted">Amount</span><span class="v">₹{{ booking['amount'] }}</span></div>
+    <div class="row"><span class="muted">Payment</span><span class="v"><span class="status-badge status-{{ booking['payment_status'] }}">{{ booking['payment_status'] }}</span></span></div>
+
+    <div style="display:flex; gap:10px; margin-top:22px;">
+      {% if booking['status'] == 'completed' and booking['payment_status'] == 'pending' %}
+        <a href="{{ url_for('pay', booking_code=booking['booking_code']) }}" class="btn btn-primary btn-block">Pay Now</a>
+      {% endif %}
+      <a href="{{ url_for('user_dashboard') }}" class="btn btn-ghost btn-block">Back to Dashboard</a>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

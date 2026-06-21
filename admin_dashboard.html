@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Admin Overview{% endblock %}
+{% block content %}
+{% from "_icons.html" import layers, shield, bolt, wallet, chart %}
+
+<div class="section-head">
+  <div>
+    <span class="eyebrow">Admin Console</span>
+    <h2>Operations Overview</h2>
+  </div>
+  <a href="{{ url_for('admin_bookings') }}" class="btn btn-primary">Manage Bookings</a>
+</div>
+
+<div class="kpi-grid">
+  <div class="card kpi-card">
+    <span class="icon-badge">{{ layers("") }}</span>
+    <span class="lbl">Total Slots</span>
+    <div class="num">{{ total_slots }}</div>
+    <div class="delta">Across {{ floor_occupancy | length }} floors</div>
+  </div>
+  <div class="card kpi-card">
+    <span class="icon-badge" style="background:rgba(255,84,112,0.14);">{{ shield("") }}</span>
+    <span class="lbl">Occupied Now</span>
+    <div class="num" style="color:var(--red);">{{ occupied }}</div>
+    <div class="delta">{{ ((occupied / total_slots * 100) if total_slots else 0) | round(1) }}% utilization</div>
+  </div>
+  <div class="card kpi-card">
+    <span class="icon-badge" style="background:rgba(255,171,46,0.14);">{{ bolt("") }}</span>
+    <span class="lbl">Vehicles Active</span>
+    <div class="num" style="color:var(--amber);">{{ active_vehicles }}</div>
+    <div class="delta">Checked in, not yet out</div>
+  </div>
+  <div class="card kpi-card">
+    <span class="icon-badge" style="background:rgba(43,213,118,0.14);">{{ wallet("") }}</span>
+    <span class="lbl">Today's Revenue</span>
+    <div class="num" style="color:var(--green);">₹{{ today_revenue }}</div>
+    <div class="delta">Lifetime: ₹{{ total_revenue }}</div>
+  </div>
+</div>
+
+<div class="grid grid-2" style="align-items:start;">
+  <div class="card chart-card">
+    <h3>{{ chart("") }} Revenue — Last 7 Days</h3>
+    <canvas id="revenueChart" height="200"></canvas>
+  </div>
+  <div class="card chart-card">
+    <h3>{{ layers("") }} Occupancy by Floor</h3>
+    <canvas id="floorChart" height="200"></canvas>
+  </div>
+</div>
+
+<div style="margin-top:30px;">
+  <div class="section-head">
+    <h2 style="font-size:1.2rem;">Recent Bookings</h2>
+    <a href="{{ url_for('admin_bookings') }}" class="muted" style="font-size:0.85rem;">View all →</a>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>Code</th><th>User</th><th>Vehicle</th><th>Floor / Slot</th><th>Status</th><th>Amount</th></tr>
+      </thead>
+      <tbody>
+        {% for b in recent_bookings %}
+        <tr>
+          <td class="cell-mono">{{ b['booking_code'] }}</td>
+          <td>{{ b['user_name'] }}</td>
+          <td>{{ b['vehicle_number'] }} <span class="pill {{ b['vehicle_type'] }}">{{ b['vehicle_type'] }}</span></td>
+          <td>{{ b['floor_name'] }} &middot; {{ b['slot_number'] }}</td>
+          <td><span class="status-badge status-{{ b['status'] }}">{{ b['status'] }}</span></td>
+          <td>₹{{ b['amount'] }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="muted text-center">No bookings yet.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<script>
+const revLabels = {{ revenue_days | tojson }};
+const revData = {{ revenue_totals | tojson }};
+
+new Chart(document.getElementById('revenueChart'), {
+  type: 'line',
+  data: {
+    labels: revLabels,
+    datasets: [{
+      label: 'Revenue (₹)',
+      data: revData,
+      borderColor: '#00c2a0',
+      backgroundColor: 'rgba(0,194,160,0.14)',
+      tension: 0.35,
+      fill: true,
+      pointBackgroundColor: '#00c2a0',
+    }]
+  },
+  options: {
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { ticks: { color: '#8893a8' }, grid: { color: '#232b3b' } },
+      y: { ticks: { color: '#8893a8' }, grid: { color: '#232b3b' } }
+    }
+  }
+});
+
+const floorLabels = {{ floor_names | tojson }};
+const floorOccupied = {{ floor_occupied | tojson }};
+const floorTotal = {{ floor_totals | tojson }};
+
+new Chart(document.getElementById('floorChart'), {
+  type: 'bar',
+  data: {
+    labels: floorLabels,
+    datasets: [
+      { label: 'Occupied', data: floorOccupied, backgroundColor: '#ff5470', borderRadius: 5 },
+      { label: 'Total', data: floorTotal, backgroundColor: '#313b50', borderRadius: 5 }
+    ]
+  },
+  options: {
+    plugins: { legend: { labels: { color: '#c7cedb' } } },
+    scales: {
+      x: { ticks: { color: '#8893a8' }, grid: { display: false } },
+      y: { ticks: { color: '#8893a8' }, grid: { color: '#232b3b' } }
+    }
+  }
+});
+</script>
+{% endblock %}
